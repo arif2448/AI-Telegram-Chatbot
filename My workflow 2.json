@@ -1,0 +1,188 @@
+{
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "You are a helpful AI assistant. You must always use the Tavily search tool to find real-time, up-to-date facts and current events before answering any question."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "b03eccde-4f27-434b-9a4e-5555bbdf680f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "qwen/qwen3.8-27b",
+        "options": {
+          "maxTokensToSample": 500
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        64,
+        176
+      ],
+      "id": "d6e9b0e4-ec85-4eec-a16a-af5ef2191dd8",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "BuEUVzWneeENS7YB",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Query', `Search the web for real-time information, current events, and up-to-date facts.`, 'string') }}",
+        "options": {}
+      },
+      "type": "@tavily/n8n-nodes-tavily.tavilyTool",
+      "typeVersion": 2,
+      "position": [
+        288,
+        192
+      ],
+      "id": "5c3fb383-e718-423d-92b4-2270fe90e569",
+      "name": "Search the web in Tavily",
+      "credentials": {
+        "tavilyApi": {
+          "id": "GNGV61mZRmWybYHW",
+          "name": "Tavily account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        176,
+        208
+      ],
+      "id": "08a335b3-61e1-4efa-b086-c9c41965379b",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0ebdb98a-24c4-4833-9cff-a2628ccd30b2",
+      "name": "Telegram Trigger",
+      "webhookId": "ba927363-a6f9-4a6d-a04b-3ae436a2e898",
+      "credentials": {
+        "telegramApi": {
+          "id": "sMvDuSLi6orRbVnp",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "46623acb-fb94-4ea5-b002-79d5f472afdc",
+      "name": "Send a text message",
+      "webhookId": "8e675132-9398-404a-9f95-8613f8f31169",
+      "credentials": {
+        "telegramApi": {
+          "id": "sMvDuSLi6orRbVnp",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search the web in Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        []
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3ff6e6ca-138a-4fdf-88c3-cafa0fcf402d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e25cd7d47ddb21d902c8583e78d85ec3171d4e83f6f1180ee17b97aab487ca77"
+  },
+  "nodeGroups": [],
+  "id": "YKBX0EfKR5LM7cGn",
+  "tags": []
+}
